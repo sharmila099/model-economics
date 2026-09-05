@@ -1,0 +1,165 @@
+workload:
+  name: default
+  description: >
+    A balanced 5-category workload representing real-world enterprise LLM use cases.
+    Covers summarization, multi-step reasoning, code generation, structured extraction,
+    and RAG-style question answering.
+
+prompts:
+  - id: summarization_01
+    category: summarization
+    description: "Long earnings call → executive bullet summary"
+    system: |
+      You are a senior financial analyst. Summarize the following earnings call
+      transcript into exactly 5 bullet points. Each bullet must be under 25 words,
+      focus on forward-looking guidance, and include a specific metric or figure.
+    user: |
+      Good morning, everyone, and thank you for joining our Q3 2025 earnings call.
+      I'm pleased to report that we delivered another quarter of strong results,
+      with total revenue of $14.3 billion, up 18% year-over-year. Our cloud
+      segment continued to be the primary growth driver, growing 34% to $8.9 billion.
+      We saw particularly strong performance in our AI and machine learning services,
+      which grew 67% as enterprise customers accelerated their digital transformation
+      initiatives. Operating income was $3.1 billion, representing a 21.7% operating
+      margin, compared to 19.2% in Q3 2024. We continued to invest heavily in
+      infrastructure, with capital expenditures of $2.8 billion this quarter.
+      Looking ahead to Q4, we expect revenue in the range of $15.0 to $15.4 billion,
+      implying growth of 16% to 19% year-over-year. We anticipate operating margins
+      to be approximately 22% as we continue to scale our AI platform. For the full
+      year 2025, we are raising our revenue guidance to $55.5 to $56.0 billion.
+    expected_format: "5 bullet points, each under 25 words with a metric"
+
+  - id: reasoning_01
+    category: reasoning
+    description: "Multi-step financial ratio analysis with a decision"
+    system: |
+      You are a CFO assistant. Answer the following question step by step,
+      showing all intermediate calculations. Conclude with a clear YES or NO
+      recommendation and a single justifying sentence.
+    user: |
+      A company has the following financials for FY2025:
+      - Revenue: $42M, COGS: $18M, Operating Expenses: $12M
+      - Interest Expense: $1.5M, Tax Rate: 28%
+      - Total Assets: $85M, Total Liabilities: $38M
+      - Current Assets: $22M, Current Liabilities: $11M
+      - Beginning Retained Earnings: $15M
+
+      Calculate: (1) Gross Margin %, (2) Net Income, (3) Debt-to-Equity Ratio,
+      (4) Current Ratio, (5) Ending Retained Earnings.
+      Then answer: Is this company financially healthy enough to take on an
+      additional $10M in debt to fund a plant expansion?
+    expected_format: "Numbered calculations then YES/NO + one sentence"
+
+  - id: code_generation_01
+    category: code_generation
+    description: "Python: production-grade async API client with retry & timeout"
+    system: |
+      You are a senior Python engineer. Write production-quality code only.
+      Include type hints, docstrings, error handling, and logging. No placeholders.
+    user: |
+      Write a Python async HTTP client class called `ResilientAPIClient` that:
+      1. Uses `httpx.AsyncClient` for all HTTP calls.
+      2. Implements exponential backoff retry logic (max 3 retries, base delay 1s,
+         jitter ±20%) for HTTP 429, 500, 502, 503, 504 status codes.
+      3. Enforces a 30-second total request timeout and a 5-second connect timeout.
+      4. Logs each retry attempt at WARNING level with the attempt number, status
+         code, and delay using Python's `logging` module.
+      5. Raises a custom `MaxRetriesExceededError` if all retries are exhausted.
+      6. Provides a `get()` and `post()` method that both go through the retry logic.
+      Include a brief usage example in the docstring.
+    expected_format: "Complete Python class, no placeholders, runnable code"
+
+  - id: extraction_01
+    category: structured_extraction
+    description: "Extract structured invoice data → JSON with validation"
+    system: |
+      You are a document processing AI. Extract all data from the invoice below
+      into a valid JSON object. Follow the schema exactly. If a field is missing,
+      use null. Dates must be ISO 8601 format (YYYY-MM-DD). Amounts must be
+      numeric (no currency symbols). Do not include any text outside the JSON object.
+    user: |
+      INVOICE
+
+      From: Nexus Cloud Solutions Pte. Ltd.
+            10 Anson Road, #27-15, International Plaza
+            Singapore 079903
+            GST Reg: 202512345A
+
+      To:   Priya Sharma, Head of AI Infrastructure
+            FinanceCore Technologies
+            Level 18, Tower B, Cybercity
+            Hyderabad 500081, India
+
+      Invoice No: NCL-2025-08-4471
+      Invoice Date: 28th August 2025
+      Due Date: 27th September 2025
+      PO Reference: FCT-AI-2025-Q3-099
+
+      Description                          Qty   Unit Price    Amount
+      ─────────────────────────────────────────────────────────────────
+      LLM API Access (Enterprise Tier)     1     $8,500.00     $8,500.00
+      GPU Compute Hours (A100 x 40hr)      40    $4.20         $168.00
+      Model Fine-tuning Service (LoRA)     1     $1,200.00     $1,200.00
+      Priority Support (Monthly)           1     $500.00       $500.00
+
+      Subtotal:                                               $10,368.00
+      GST (9%):                                                  $933.12
+      TOTAL DUE:                                             $11,301.12
+
+      Payment Terms: Net 30. Wire transfer only. Late payment: 1.5%/month.
+      Bank: DBS Bank | Account: 027-901234-5 | Swift: DBSSSGSG
+
+      Thank you for your business!
+    expected_format: "Pure JSON object matching the schema, no extra text"
+
+  - id: rag_qa_01
+    category: rag_qa
+    description: "Grounded QA: answer only from provided context, refuse if unknown"
+    system: |
+      You are a compliance assistant. Answer the user's question using ONLY the
+      information provided in the CONTEXT section below. If the answer cannot be
+      found in the context, respond with exactly: "This information is not available
+      in the provided documentation." Do not use any external knowledge.
+      Cite the specific paragraph number your answer comes from.
+    user: |
+      CONTEXT:
+      [Para 1] Under Section 4.2 of the Enterprise AI Acceptable Use Policy (v3.1,
+      effective 1 July 2025), employees are prohibited from inputting personally
+      identifiable information (PII) into any external AI system that has not been
+      approved by the Information Security Review Board (ISRB).
+
+      [Para 2] Approved AI systems are listed on the internal SharePoint portal at
+      /sites/ai-governance/approved-tools. The list is updated on the first Monday
+      of each quarter. Systems not on the list require a formal waiver submitted
+      via the IT Service Desk.
+
+      [Para 3] Violations of Section 4.2 must be reported to the Chief Privacy
+      Officer within 48 hours of discovery. Repeated violations (three or more
+      within a 12-month rolling window) may result in disciplinary action up to
+      and including termination of employment.
+
+      [Para 4] Managers are responsible for ensuring their direct reports complete
+      the mandatory AI Literacy and Compliance training (Course ID: COMP-AI-301)
+      within 30 days of the policy effective date and annually thereafter.
+
+      QUESTION: An employee discovers that a colleague has been using an unapproved
+      AI tool that processed customer data. What are the required steps and within
+      what timeframe must they be completed?
+    expected_format: "Specific answer with paragraph citation, or not-available refusal"
+
+# Judge scoring rubric applied to every model output
+quality_rubric:
+  dimensions:
+    - name: accuracy
+      description: "Is the answer factually correct and does it follow the instructions precisely?"
+      weight: 0.40
+    - name: completeness
+      description: "Does the response fully address all parts of the prompt without omitting key elements?"
+      weight: 0.30
+    - name: format_compliance
+      description: "Does the output match the expected format specified in the prompt?"
+      weight: 0.20
+    - name: conciseness
+      description: "Is the response appropriately concise without unnecessary filler or repetition?"
+      weight: 0.10
+  scale: 10   # Each dimension scored 1-10; final = weighted average
