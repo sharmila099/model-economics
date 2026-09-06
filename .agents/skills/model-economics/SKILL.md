@@ -21,7 +21,7 @@ data-driven decision about which model to use for a production workload.
 Activate this skill when the user asks any of the following:
 - "Which model should I use for this task?"
 - "How much will this pipeline cost at scale?"
-- "Compare Gemini vs GPT-4o vs Claude for my use case."
+- "Compare Gemini vs GPT vs Claude for my use case."
 - "Run a cost benchmark."
 - "Analyze model economics."
 - "What is the cheapest model that meets quality bar X?"
